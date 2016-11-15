@@ -5,12 +5,15 @@ namespace App\Http\Middleware;
 use Closure;
 use App\Library\User\Users;
 use App\Helper\Helper;
+use App\Helper\CustomRequest;
 
 class ApiKey
 {
 
     protected $helper;
     protected $user;
+    protected $custom;
+
     public function __construct(Helper $helper, Users $user)
     {
         $this->helper = $helper;
@@ -31,6 +34,7 @@ class ApiKey
         $user = $this->user->getUserId();
 
         if ($user) {
+            $request->setUserId($user);
             return $next($request);
         } else {
             return response('Unauthorized Token. ', 401);

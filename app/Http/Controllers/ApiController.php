@@ -2,27 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 use App\PhoneBook\Contact\Contact;
-
-use App\Http\Requests;
+use Illuminate\Http\Request;
 
 class ApiController extends Controller
 {
 
     protected $contact;
+    protected $request;
     
-    public function __construct(Contact $contact)
+    public function __construct(Contact $contact, Request $request)
     {
         
         $this->contact = $contact;
+        $this->request = $request;
     }
 
     public function index()
     {
-
-        $contacts   = $this->contact->index();
+        $userId     = $this->request->getUserId();
+        $contacts   = $this->contact->index($userId);
         return $contacts;
     }
 
@@ -41,21 +40,24 @@ class ApiController extends Controller
         'notes'    =>   'max:255',
          ]);
 
-        $this->contact->store($request);
-        $data       = $request->all();
-        $contacts   = $this->contact->index($data);
+        $userId     = $this->request->getUserId();
+        $this->contact->store($request, $userId);
+        $contacts   = $this->contact->index($userId);
+
         return  response()->json($contacts);
     }
 
     public function show($contactId)
     {
-        $contacts   = $this->contact->show($contactId);
+        $userId     = $this->request->getUserId();
+        $contacts   = $this->contact->show($contactId, $userId);
         return response()->json($contacts);
     }
 
     public function edit($contactId)
     {
-        $contacts   = $this->contact->show($contactId);
+        $userId     = $this->request->getUserId();
+        $contacts   = $this->contact->show($contactId, $userId);
         return response()->json($contacts);
     }
 
@@ -69,17 +71,18 @@ class ApiController extends Controller
         'notes'    =>   'max:255',
          ]);
 
+        $userId     = $this->request->getUserId();
         $data       = $request->all();
-        $this->contact->update($data, $contactId);
-        $contacts   = $this->contact->index();
+        $this->contact->update($data, $contactId, $userId);
+        $contacts   = $this->contact->index($userId);
         return response()->json($contacts);
     }
 
     public function destroy($contactId)
     {
-
-        $this->contact->delete($contactId);
-        $contacts   = $this->contact->index();
+        $userId     = $this->request->getUserId();
+        $this->contact->delete($contactId, $userId);
+        $contacts   = $this->contact->index($userId);
         return $contacts;
     }
 }
